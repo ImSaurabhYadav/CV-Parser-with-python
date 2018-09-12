@@ -1,2 +1,2 @@
-# CV-Parser-with-python
+# CV Parser with Python
 CV Parser API
