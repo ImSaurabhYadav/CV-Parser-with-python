@@ -58,16 +58,19 @@ def unique(sequence):
     seen = set()
     return [x for x in sequence if not (x in seen or seen.add(x))]
 
-text = docx2txt.process('Mahima.docx').replace('\t', '\n')
+text = docx2txt.process('AnchitGupta.docx').replace('\t', '\n')
 '''text = text.replace(':', ' ')
 text = re.sub('CV', '', text)
 text = re.sub('Curriculum Vitae', '', text)
 text = re.sub('CURRICULUM VITAE', '', text)
 text = re.sub('RESUME', '', text)
 text = re.sub('Resume', '', text)'''
-text = text.translate(string.punctuation)
+#text = re.sub(r"(\-)|(\:)", ' ', text)
+#text = text.translate(string.punctuation)
 text = nltk.tokenize.word_tokenize(text)
-print(nltk.pos_tag(text))
+is_noun = lambda pos: pos[:2] == 'NN'
+nouns = [word for (word, pos) in nltk.pos_tag(text) if is_noun(pos)] 
+print(nouns)
 
 '''
 datatoProcess = {}
