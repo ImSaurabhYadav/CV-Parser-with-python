@@ -58,7 +58,7 @@ def unique(sequence):
     seen = set()
     return [x for x in sequence if not (x in seen or seen.add(x))]
 
-text = docx2txt.process('AnchitGupta.docx').replace('\t', '\n')
+text = docx2txt.process('../cvs/AnchitGupta.docx').replace('\t', '\n')
 '''text = text.replace(':', ' ')
 text = re.sub('CV', '', text)
 text = re.sub('Curriculum Vitae', '', text)
