@@ -1,26 +1,14 @@
-import nltk
 import docx2txt
-import tkinter
 import re
-import string
+import os
 
-def findName(text):
-    for iterate in text:
-        if len(iterate.split())>=1 and len(iterate.split())<=4:
-            return iterate
-def findMob(text):
-    for iterate in text:
-        mob = re.search(r"(\d{9,13})|(\+\d{10,14})|(\+\d{1,3}\-\d{8,11})|(\+\d{1,3}\-\d{2,4}\-\d{2,4}\-\d{2,4})", iterate)
-        if mob is not None:
-            return mob.group(0)
-        
-def findEmail(text):
-    for iterate in text:
-        email =  re.findall(r"([a-zA-Z0-9._ ]+[@]([a-z]+[.]{1}){1,2}[a-z]{2,5})", text)
-        return email
+datatoProcess = {}
+datatoProcess['Skills'] = ['technical skills', 'skills', 'technologies', 'programming languages', 'programming language', 'profile', 'summary', 'technology used', 'tools and software']
+datatoProcess['Objective'] = ['objective']
+datatoProcess['Education'] = ['educational qualifications', 'academic qualifications', 'academics', 'qualifications', 'qualification']
+datatoProcess['Experience'] = ['experince', 'work experience', 'professional experince', 'total experince']
 
-
-#
+'''
 def customRegex(first, second):
     second = second.lower()
     length1 = len(first)
@@ -34,53 +22,72 @@ def customRegex(first, second):
                     string+=second[i+1]
                     i+=1
                 return string
+'''
+def process(text):
+    Set, MainSet = set([]), {}
+    for iterate in text:
+        name = re.findall(r'([A-Za-z]*) ?([A-Za-z]+.{0,1}) ([A-Za-z])*', iterate)
+        if len(name)>=1 and len(name)<=4:
+            MainSet['Name'] = iterate
+            break
+        
 
+    for iterate in text:
+        mob = re.findall(r"\+{0,1}\d{2,3}\W{0,1}\d{3,4}\W{0,1}\d{3,4}\W{0,4}\d{3,4}", iterate)
+        if mob>[]:
+            MainSet['Mobile'] = mob
+            break
+        
 
-def processTheText(keys, listOfText):
-    resultSet = {}
-    Set = set([])
-    for Iterator in listOfText:
-        for key in keys: 
-            for keyIterator in keys[key]:
+    for iterate in text:
+        email =  re.findall(r"([a-zA-Z0-9._ ]+[@][a-z]+[.]{1}[a-z]{2,5})", iterate)
+        if email>[]:
+            MainSet['Email'] = email
+            break
+    
+
+    for iterate in text:
+        if re.search(r'(Birth|DOB|Dob|dob)', iterate):
+            dob =  re.findall(r"\d{2,4}\W\d{1,2}\W\d{2,4}", iterate)
+            if dob>[]:
+                MainSet['Date of Birth'] = dob
+            break
+    '''
+    for Iterator in text:
+        for key in datatoProcess: 
+            for keyIterator in datatoProcess[key]:
                 result = customRegex(keyIterator, Iterator)
                 if result is not None:
                     for i in result.replace(',', ' ').split():
                         Set.add(i)
                     #resultSet[key] = Set
-                    print(key)
-                    print(Set)
+                    if key in MainSet:
+                        MainSet[key].update((Set))
+                    MainSet[key] = (Set)                       
                     Set.clear()
     ###resultSet['Mobile'] = findMob(listOfText)
-    #print(findEmail(listOfText))
-    return resultSet
+    #print(findEmail(listOfText))'''
+    return MainSet
 
-def unique(sequence):
-    seen = set()
-    return [x for x in sequence if not (x in seen or seen.add(x))]
 
-text = docx2txt.process('../cvs/AnchitGupta.docx').replace('\t', '\n')
-'''text = text.replace(':', ' ')
-text = re.sub('CV', '', text)
-text = re.sub('Curriculum Vitae', '', text)
-text = re.sub('CURRICULUM VITAE', '', text)
-text = re.sub('RESUME', '', text)
-text = re.sub('Resume', '', text)'''
-#text = re.sub(r"(\-)|(\:)", ' ', text)
-#text = text.translate(string.punctuation)
-text = nltk.tokenize.word_tokenize(text)
-is_noun = lambda pos: pos[:2] == 'NN'
-nouns = [word for (word, pos) in nltk.pos_tag(text) if is_noun(pos)] 
-print(nouns)
-
-'''
-datatoProcess = {}
-datatoProcess['Name'] = ['name']
-datatoProcess['Skills'] = ['technical skills', 'skills', 'technologies', 'programming languages', 'programming language', 'profile', 'summary', 'technology used', 'tools and software']
-datatoProcess['Objective'] = ['objective']
-datatoProcess['Education'] = ['educational qualifications', 'academic qualifications', 'academics', 'qualifications', 'qualification']
-datatoProcess['Experience'] = ['experince', 'work experience', 'professional experince', 'total experince']
-datatoProcess['D-O-B'] = ['dob', 'date of birth']
-#print(text)
-resultSet = processTheText(datatoProcess, text)
-print(resultSet)
-'''
+for root, dirs, files in os.walk('../CVs/', topdown=False):
+    ct=1
+    for iterate in files:
+        if iterate.split('.')[-1]=='docx' and iterate[0]!='~':
+            print(iterate)
+            name = '../CVs/'+iterate
+            text = docx2txt.process(name).replace('\t', '\n')
+            
+            text = re.sub('CV', '', text)
+            text = re.sub('Curriculum Vitae', '', text)
+            text = re.sub('CURRICULUM VITAE', '', text)
+            text = re.sub('CURRICULUM-VITAE', '', text)
+            text = re.sub('RESUME', '', text)
+            text = re.sub('Resume', '', text)
+            text = re.sub('Gold medalist', '', text)
+            text = re.sub('DR.', '', text)
+            text = re.sub('Dr.', '', text)
+            text = re.sub('Mr.', '', text)
+            text = text.split('\n')
+            print(ct, ':', process(text))
+            ct+=1
